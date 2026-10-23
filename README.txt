@@ -9,3 +9,4 @@ Outbound Sales Co-Pilot - PWA package
 8. .well-known/assetlinks.json has placeholders; fill in package name + SHA-256 before using a TWA.
 9. v3: Prompt Builder removed; cockpit is tab 1; pipeline + email templates added; KPI connect fix. Cache copilot-v3.
 10. v4: dark thin scrollbars, auto-height textareas, 4x2 KPI grid, teleprompter default, seamless cards, wider intake. Cache copilot-v4.
+11. v5: Help & Guide (tour + cheat sheet), Settings (profile auto-fill, font size, backup/restore/reset), cockpit spacing. Cache copilot-v5.

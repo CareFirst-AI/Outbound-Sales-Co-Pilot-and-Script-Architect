@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head><body>
-<div class="hud"><h1>📞 Co-Pilot</h1><nav id="nav"><button data-t="t1" class="on">1 · Live Call Cockpit</button><button data-t="t2">2 · Pipeline &amp; Follow-Ups</button><button data-t="t3">3 · Listing Intake</button><button data-t="t4">4 · KPI Tracker</button></nav><div class="hudr" title="Space: start/pause timer · D: +1 dial · C: +1 connect · 1–6: scripts"><span class="big" id="tm">00:00</span><button class="p" id="ts">Start</button><button id="tr">Reset</button><button class="p" id="hd">+1 Dial <b id="hdn">0</b></button><button class="p" id="hc">+1 Connect <b id="hcn">0</b></button></div></div>
+<div class="hud"><h1>📞 Co-Pilot</h1><nav id="nav"><button data-t="t1" class="on">1 · Live Call Cockpit</button><button data-t="t2">2 · Pipeline &amp; Follow-Ups</button><button data-t="t3">3 · Listing Intake</button><button data-t="t4">4 · KPI Tracker</button></nav><div class="hudr" title="Space: start/pause timer · D: +1 dial · C: +1 connect · 1–6: scripts"><span class="big" id="tm">00:00</span><button class="p" id="ts">Start</button><button id="tr">Reset</button><button class="p" id="hd">+1 Dial <b id="hdn">0</b></button><button class="p" id="hc">+1 Connect <b id="hcn">0</b></button><button id="hh" title="Help (?)">❓ Help &amp; Guide</button><button id="hs">⚙️ Settings</button></div></div>
 <main>
 
 <section id="t1" class="tab on"><div id="clk"></div><div class="cock">
@@ -30,7 +30,7 @@
 <label>Pipeline stage</label><select id="l_stage"><option>Cold Lead</option><option>Interested - Sent Info</option><option>Warm Follow-Up</option><option>Ready to Close</option><option>Closed Won</option></select>
 <label>Next follow-up date</label><input id="l_date" type="date"><label>Notes</label><textarea id="l_notes" style="min-height:70px"></textarea><div class="row"><button class="p" id="lsave">Add to pipeline</button></div></div>
 <div><div class="row" id="lf"></div><div class="g" id="ll" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))"></div></div></div>
-<h2 style="margin-top:18px">Email templates <small>(editable; [Tiers] fills in your current tiers when copied)</small></h2><div class="g" id="tpls"></div></section>
+<div class="row" style="justify-content:space-between;margin-top:18px"><h2 style="margin:0">Email templates <small>(filled with your profile · [Tiers] fills on copy)</small></h2><button id="tpv">Edit templates</button></div><div class="g" id="tpls"></div></section>
 <section id="t3" class="tab"><div class="g">
 <div class="c"><label>Full name / business name</label><input id="f_name"><label>Region</label><select id="f_reg"><option>US</option><option>EU</option><option>UK</option></select>
 <label>Email</label><input id="f_email" type="email"><label>Phone</label><input id="f_phone"><label>Former bank / institution / business</label><input id="f_inst"><label>Career background</label><textarea id="f_bg" style="min-height:70px"></textarea></div>

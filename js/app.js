@@ -85,10 +85,10 @@ chk();stabs();tiersR();cardsR();fillTiers();recs();kpi();
 
 /* v2 upgrades */
 let PV=1;const hl=t=>esc(t).replace(/\[[^\]]*\]/g,m=>`<span class="ph">${m}</span>`).replace(/\n/g,"<br>");
-sbox=function(){const s=S.scripts[S.si];$("sbox").innerHTML=`<div class="row" style="margin-top:0"><input data-p="scripts.${S.si}.t" value="${esc(s.t)}" style="flex:1"><button id="pvt">${PV?"Edit script":"Teleprompter"}</button></div>`+(PV?`<div class="pv">${hl(s.b)}</div>`:`<textarea class="script" data-p="scripts.${S.si}.b">${esc(s.b)}</textarea>`);$("pvt").onclick=()=>{PV=!PV;sbox()}};
+sbox=function(){const s=S.scripts[S.si];$("sbox").innerHTML=`<div class="row" style="margin-top:0"><input data-p="scripts.${S.si}.t" value="${esc(s.t)}" style="flex:1"><button id="pvt">${PV?"Edit script":"Teleprompter"}</button></div>`+(PV?`<div class="pv">${hl(fill(s.b))}</div>`:`<textarea class="script" data-p="scripts.${S.si}.b">${esc(s.b)}</textarea>`);$("pvt").onclick=()=>{PV=!PV;sbox()}};
 const _kpi=kpi;kpi=function(){const r=_kpi();$("hdn").textContent=S.kpi.dials;$("hcn").textContent=S.kpi.connects;refreshEod();return r};
 $("hd").onclick=()=>{S.kpi.dials++;save();kpi()};$("hc").onclick=()=>{S.kpi.connects++;S.kpi.dials++;save();kpi()};
-addEventListener("keydown",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toLowerCase();
+addEventListener("keydown",e=>{if($("ov")&&!$("ov").hidden)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toLowerCase();
 if(k===" "){e.preventDefault();if(e.target.tagName==="BUTTON")e.target.blur();$("ts").click()}else if(k==="d")$("hd").click();else if(k==="c")$("hc").click();
 else if(/^[1-6]$/.test(k)&&S.scripts[k-1]){document.querySelector("[data-t=t1]").click();S.si=+k-1;save();stabs()}});
 {const t=location.hash.slice(1);if(/^t[1-4]$/.test(t))document.querySelector(`nav button[data-t=${t}]`).click()}
@@ -96,10 +96,11 @@ stabs();kpi();
 
 /* v3 */
 S.kpi.dials=Math.max(S.kpi.dials,S.kpi.connects);S.pad=S.pad||{name:"",phone:"",notes:""};S.leads=S.leads||[];
-S.tpl=S.tpl||[
+const TPL0=[
 {n:"1 · Initial cold outreach",s:"Your professional listing: an introduction from [Company]",b:"Dear [Name],\n\nMy name is [My name] and I work with [Company]. We’re building an online professional directory, and your background at [Bank/Business] stood out to us.\n\nA listing gives you one accurate, verified page about your career. It’s a paid service, and I’d be glad to share the options and prices. If this isn’t of interest, simply reply “no” and I won’t contact you again.\n\nKind regards,\n[My name]\n[Company] · [Phone] · [Website]"},
 {n:"2 · As promised: tiers & info",s:"As promised: listing options and prices",b:"Dear [Name],\n\nThank you for speaking with me today. As promised, here are our listing options:\n\n[Tiers]\n\nTerms, billing period and our refund policy: [link]. There’s no obligation, and you’re welcome to take your time or ask me anything. May I call you on [date/time]?\n\nKind regards,\n[My name]\n[Company] · [Phone]"},
 {n:"3 · Warm follow-up check-in",s:"Following up on your listing questions",b:"Dear [Name],\n\nI enjoyed our conversation on [date] and wanted to check whether you had any questions about the [Tier name] listing. I’m happy to go over the details again or send anything else you need.\n\nIf now isn’t the right time, just let me know and I’ll respect that.\n\nKind regards,\n[My name]\n[Company] · [Phone]"}];
+S.tpl=S.tpl||JSON.parse(JSON.stringify(TPL0));
 const toast=m=>{const t=$("toast");t.textContent=m;t.style.opacity=1;setTimeout(()=>t.style.opacity=0,1700)};
 function refreshEod(){const e=$("eod"),i=e.value.indexOf("Notes / blockers:"),n=i>=0?e.value.slice(i+17):"";e.value=eod().replace(/ $/,"")+n}
 /* clock bar */
@@ -125,7 +126,7 @@ $("ll").onclick=e=>{const d=e.target.dataset;if(d.ld!==undefined&&confirm("Delet
 $("lsave").onclick=()=>{const g=k=>$("l_"+k).value.trim();if(!g("name"))return alert("Add a prospect name first.");S.leads.push({name:g("name"),persona:g("persona"),region:g("region"),phone:g("phone"),email:g("email"),stage:g("stage"),date:g("date"),notes:g("notes")});save();["name","phone","email","date","notes"].forEach(k=>$("l_"+k).value="");leads();toast("Lead added")};
 /* templates */
 function tpls(){$("tpls").innerHTML=S.tpl.map((t,i)=>`<div class="c"><label>Template name</label><input data-p="tpl.${i}.n" value="${esc(t.n)}"><label>Subject</label><input data-p="tpl.${i}.s" value="${esc(t.s)}"><label>Body</label><textarea data-p="tpl.${i}.b" style="min-height:240px">${esc(t.b)}</textarea><div class="row"><button class="p" data-cp="${i}">Copy Email</button></div></div>`).join("")}
-$("tpls").onclick=e=>{const i=e.target.dataset.cp;if(i===undefined)return;const t=S.tpl[i];copy(`Subject: ${t.s}\n\n${t.b.replace("[Tiers]",S.tiers.map(x=>`- ${x.n} (${x.p}): ${x.d}`).join("\n"))}`);toast("Email copied")};
+$("tpls").onclick=e=>{const i=e.target.dataset.cp;if(i===undefined)return;const t=S.tpl[i];copy(`Subject: ${fill(t.s)}\n\n${fill(t.b).replace("[Tiers]",S.tiers.map(x=>`- ${x.n} (${x.p}): ${x.d}`).join("\n"))}`);toast("Email copied")};
 /* scratchpad */
 const padSet=()=>{$("pn").value=S.pad.name;$("pp").value=S.pad.phone;$("pt").value=S.pad.notes};
 $("pl").onclick=()=>{if(!S.pad.name.trim())return alert("Add a name first.");S.leads.push({name:S.pad.name.trim(),persona:PER[0],region:"US",phone:S.pad.phone,email:"",stage:"Cold Lead",date:"",notes:S.pad.notes});S.pad={name:"",phone:"",notes:""};save();padSet();leads();toast("Sent to Pipeline")};
@@ -142,3 +143,48 @@ const _lr=leads;leads=function(){_lr();fit()};const _tp=tpls;tpls=function(){_tp
 addEventListener("input",e=>{if(e.target.matches&&e.target.matches(SEL))autosize(e.target)});
 addEventListener("resize",fit);$("nav").addEventListener("click",()=>setTimeout(fit,0));
 fit();
+
+/* v5: help, tour, settings */
+S.prof=S.prof||{name:"",company:"",url:"",contact:""};S.fs=S.fs||17;
+const applyFs=()=>document.documentElement.style.setProperty("--fs",S.fs+"px");applyFs();
+function fill(t){const p=S.prof||{};[[/\[My name\]/g,p.name],[/\[Company\]/g,p.company],[/\[(URL|Website)\]/g,p.url],[/\[(phone\/email|Phone)\]/g,p.contact]].forEach(([r,v])=>{if(v&&v.trim())t=t.replace(r,v.trim())});return t}
+const tierTxt=()=>S.tiers.map(x=>`- ${x.n} (${x.p}): ${x.d}`).join("\n");
+let TP=1;
+tpls=function(){$("tpls").innerHTML=S.tpl.map((t,i)=>TP?`<div class="c"><b>${esc(t.n)}</b><div class="mu" style="margin:6px 0">Subject: ${esc(fill(t.s))}</div><div class="pv" style="min-height:0;font-size:15px">${hl(fill(t.b).replace("[Tiers]",tierTxt()))}</div><div class="row"><button class="p" data-cp="${i}">Copy Email</button></div></div>`:`<div class="c"><label>Template name</label><input data-p="tpl.${i}.n" value="${esc(t.n)}"><label>Subject</label><input data-p="tpl.${i}.s" value="${esc(t.s)}"><label>Body</label><textarea data-p="tpl.${i}.b" style="min-height:240px">${esc(t.b)}</textarea><div class="row"><button class="p" data-cp="${i}">Copy Email</button></div></div>`).join("");fit()};
+$("tpv").onclick=()=>{TP=!TP;$("tpv").textContent=TP?"Edit templates":"Show filled preview";tpls()};
+const ov=document.createElement("div");ov.id="ov";ov.className="ov";ov.hidden=true;ov.innerHTML='<div class="mb" id="mb"></div>';document.body.appendChild(ov);
+const openM=x=>{$("mb").innerHTML=x;ov.hidden=false},closeM=()=>{ov.hidden=true;sbox();tpls()};
+ov.addEventListener("click",e=>{if(e.target===ov||e.target.dataset.x!==undefined)closeM()});
+function helpM(){openM(`<div class="mh"><h2>❓ Help & Guide</h2><button data-x class="x">✕</button></div><div class="g" style="grid-template-columns:1fr 1fr"><button class="p big2" id="tour">▶ Start Interactive Tour<br><small>6 short steps</small></button><button class="big2" id="qr">📖 Quick Reference & Shortcuts<br><small>Keys and install guide</small></button></div>`);$("tour").onclick=()=>{closeM();tour(0)};$("qr").onclick=qrM}
+function qrM(){openM(`<div class="mh"><h2>📖 Quick Reference</h2><button data-x class="x">✕</button></div><h3>Keyboard shortcuts</h3><div class="g" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">${[["Space","Start / pause timer"],["D","+1 Dial"],["C","+1 Connect (adds a dial too)"],["1–6","Flip scripts"],["?","Open this help"],["Esc","Close help or tour"]].map(([k,v])=>`<div class="c"><kbd>${k}</kbd><div class="mu" style="margin-top:6px">${v}</div></div>`).join("")}</div>
+<h3>Install this app</h3><div class="g" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))"><div class="c"><b>Desktop</b><div class="mu">Chrome or Edge: click the install icon at the right of the address bar, then Install.</div></div><div class="c"><b>Android</b><div class="mu">Chrome menu (⋮) → Install app or Add to Home screen.</div></div><div class="c"><b>iPhone / iPad</b><div class="mu">Safari: Share → Add to Home Screen.</div></div></div>
+<div class="note">Installing needs the app to be hosted on HTTPS. Data stays in this browser, so use Settings → Export backup now and then.</div><div class="row"><button id="bk">← Back</button></div>`);$("bk").onclick=helpM}
+const STEPS=[
+{tab:"t1",sel:[".hud","#clk"],t:"Top bar & clocks",b:"Check the clocks first: green means a good time to call (9am–8pm local), amber is the edge of the legal window, red is outside hours. Start the timer with Start or Space. Tap +1 Dial before each call and +1 Connect when someone answers (a connect also adds a dial)."},
+{tab:"t1",sel:["#stabs","#sbox"],t:"Live call scripts",b:"Press 1–6 to flip scripts. Teleprompter shows the script with [Placeholders] highlighted (your profile fills in your name and company). Click Edit script to change the text on the fly. Everything saves automatically."},
+{tab:"t1",sel:["#tiers","#cards"],t:"Tiers & objection cards",b:"Middle: your three tiers with price and what’s included, so you can state them plainly. Right: objection responses. Hover and click any text to edit it."},
+{tab:"t2",sel:[".pipe"],t:"Pipeline & follow-ups",b:"Log each interested prospect with a next follow-up date. Use the filter pills; Due shows today’s and overdue follow-ups. Scroll down for the email templates and tap Copy Email."},
+{tab:"t3",sel:["#t3>.g"],t:"Listing intake",b:"Read the terms aloud and confirm the prospect agrees, then fill in the details and save the record. Export JSON, CSV or a Markdown table and paste it into your CRM."},
+{tab:"t4",sel:["#kg","#rates"],t:"KPI tracker",b:"Counters and rates calculate automatically. The End-of-Day report below refreshes as numbers change: add notes under “Notes / blockers”, then copy it."}];
+const sp=document.createElement("div"),tt=document.createElement("div");sp.id="sp";tt.id="tt";sp.hidden=tt.hidden=true;document.body.append(sp,tt);let TE=[];
+function place(){if(!TE.length)return;const r=TE.map(e=>e.getBoundingClientRect()),l=Math.max(0,Math.min(...r.map(x=>x.left))-8),t=Math.max(0,Math.min(...r.map(x=>x.top))-8),R=Math.min(innerWidth,Math.max(...r.map(x=>x.right))+8),B=Math.min(innerHeight,Math.max(...r.map(x=>x.bottom))+8);Object.assign(sp.style,{left:l+"px",top:t+"px",width:R-l+"px",height:Math.max(0,B-t)+"px"})}
+function endTour(){sp.hidden=tt.hidden=true;TE=[]}
+function tour(i){const s=STEPS[i];document.querySelector(`[data-t=${s.tab}]`).click();
+tt.innerHTML=`<small class="mu">Step ${i+1} of ${STEPS.length}</small><h2>${s.t}</h2><p style="margin:4px 0 10px">${s.b}</p><div class="row" style="margin:0"><button id="tb" ${i?"":"disabled"}>← Back</button><button class="p" id="tn">${i<STEPS.length-1?"Next →":"Finish"}</button><button id="tk" class="x">Skip</button></div>`;
+$("tb").onclick=()=>tour(i-1);$("tn").onclick=()=>i<STEPS.length-1?tour(i+1):endTour();$("tk").onclick=endTour;sp.hidden=tt.hidden=false;
+setTimeout(()=>{TE=s.sel.map(q=>document.querySelector(q)).filter(Boolean);if(TE[0])TE[0].scrollIntoView({block:"nearest"});place()},120)}
+addEventListener("resize",place);addEventListener("scroll",place,true);
+addEventListener("keydown",e=>{if(e.key==="Escape"){if(!ov.hidden)closeM();endTour();return}if(e.key==="?"&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){e.preventDefault();helpM()}});
+const rerender=()=>{padSet();leads();recs();chk();stabs();tiersR();cardsR();fillTiers();tpls();kpi();applyFs()};
+function setM(){const f=(k,l)=>`<label>${l}</label><input data-p="prof.${k}" value="${esc(S.prof[k])}">`;
+openM(`<div class="mh"><h2>⚙️ Settings</h2><button data-x class="x">✕</button></div><h3>Rep & company profile</h3><small class="mu">Fills [My name], [Company], [URL]/[Website] and [phone/email]/[Phone] in the Teleprompter and email templates.</small>${f("name","My name")}${f("company","Company name")}${f("url","Website URL")}${f("contact","Contact phone / email")}
+<h3>Script font size</h3><div class="row">${[["Normal",17],["Large",19],["Extra large",21]].map(([n,v])=>`<button data-fs="${v}" class="${S.fs==v?"p":""}">${n} (${v}px)</button>`).join("")}</div>
+<h3>Backup & restore</h3><div class="row"><button class="p" id="bx">⬇ Export Full App Backup (.json)</button><button id="bi">⬆ Import Backup (.json)</button></div><input type="file" id="bf" accept=".json,application/json" hidden><div class="row"><button class="x" id="br">⚠️ Reset Scripts & Tiers to Default</button></div>`);
+document.querySelectorAll("[data-fs]").forEach(b=>b.onclick=()=>{S.fs=+b.dataset.fs;save();applyFs();setM()});
+$("bx").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="copilot-backup-"+today()+".json";a.click();toast("Backup exported")};
+$("bi").onclick=()=>$("bf").click();
+$("bf").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!Array.isArray(o.scripts)||!Array.isArray(o.tiers))throw 0;if(!confirm("Replace ALL current app data with this backup?"))return;
+S=Object.assign(JSON.parse(JSON.stringify(D)),{pad:{name:"",phone:"",notes:""},leads:[],prof:{name:"",company:"",url:"",contact:""},fs:17,tpl:JSON.parse(JSON.stringify(TPL0))},o);S.si=0;S.kpi.dials=Math.max(S.kpi.dials,S.kpi.connects);save();rerender();closeM();toast("Backup restored")}catch(x){alert("That file isn’t a valid Co-Pilot backup.")}};r.readAsText(f)};
+$("br").onclick=()=>{if(!confirm("Reset all scripts, tiers, response cards and email templates to the defaults? Your leads, intake records and KPIs are kept."))return;if(!confirm("Are you sure? Your custom wording will be lost."))return;
+Object.assign(S,{scripts:JSON.parse(JSON.stringify(D.scripts)),tiers:JSON.parse(JSON.stringify(D.tiers)),cards:JSON.parse(JSON.stringify(D.cards)),tpl:JSON.parse(JSON.stringify(TPL0)),si:0});save();rerender();toast("Defaults restored")}}
+$("hh").onclick=helpM;$("hs").onclick=setM;
