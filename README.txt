@@ -1,4 +1,3 @@
-
 # 🎧 Outbound Sales Co-Pilot (PWA)
 > An enterprise-grade, privacy-first Progressive Web Application designed specifically for high-volume B2B/B2C outbound sales representatives. Built for lightning-fast live calling, multi-region prospecting, and seamless CRM data export.
 
